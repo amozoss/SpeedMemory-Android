@@ -30,7 +30,7 @@ public class BoardView extends View {
   Paint mPaint;
   Paint mPaintPurple;
   Paint mPaintFont;
-  private ArrayList<Rect> mRects;
+  private ArrayList<Card> mCards;
   private BoardViewDelegate mBoardViewDelegate;
 
 
@@ -61,12 +61,12 @@ public class BoardView extends View {
     mPaintPurple.setColor(myColor);
     mPaintPurple.setStyle(Paint.Style.FILL);
     mPaintFont = new Paint();
-    mPaintFont.setColor(Color.GREEN);
+    mPaintFont.setColor(Color.WHITE);
     mPaintFont.setTextSize(40);
     Paint.FontMetrics fm = new Paint.FontMetrics();
     mPaintFont.setTextAlign(Paint.Align.CENTER);
     mPaintFont.getFontMetrics(fm);
-    mRects = new ArrayList<Rect>();
+    mCards = new ArrayList<Card>();
     mContext = context;
   }
 
@@ -82,9 +82,12 @@ public class BoardView extends View {
     int touchX = (int) event.getX();
     int touchY = (int) event.getY();
     if (event.getAction() == MotionEvent.ACTION_DOWN) {
-      for(Rect rect : mRects) {
-        if (rect.contains(touchX, touchY)) {
-          Log.d("RECT", String.format("Rect %d, %d", rect.centerX(), rect.centerY()));
+      for(Card card : mCards) {
+        if (card.getRect().contains(touchX, touchY)) {
+          Log.d("TOUCHRECT", String.format("Card %d, %d", card.getX(), card.getY()));
+          if (mBoardViewDelegate != null) {
+            mBoardViewDelegate.choose(card.getY(), card.getX());
+          }
         }
       }
     }
@@ -132,7 +135,7 @@ public class BoardView extends View {
     int width = (mWidth / ROWS) - PADDING;
     int height = (mHeight / COLS) - PADDING;
     int count = 0;
-    //mRects.clear();
+    mCards.clear();
     for (int row = 0; row < ROWS ; row++) {
       for (int col = 0; col < COLS; col++) {
         Rect rect = new Rect(col * width + ((col + 1) * PADDING),
@@ -145,8 +148,12 @@ public class BoardView extends View {
             mCanvas.drawRect(rect, mPaintPurple);
           }
           else {
-            //mRects.add(rect);
+            mCards.add(new Card(rect, row, col));
             mCanvas.drawRect(rect, mPaint);
+            double numb = Double.parseDouble(number);
+            double a = (255 * (1.0/numb));
+            int al = (int)a;
+            mPaintFont.setAlpha(mBoardViewDelegate.getAlpha(row, col));
             mCanvas.drawText(number, rect.exactCenterX(), rect.exactCenterY() + 15, mPaintFont);
           }
         }
@@ -158,39 +165,6 @@ public class BoardView extends View {
 }
 
 
-  private void generateBackground() {
-      /*
-      this.removeAllViews();
-
-      int total = 12;
-      int column = 5;
-      int row = total / column;
-      this.setColumnCount(column);
-      this.setRowCount(row + 1);
-      for(int i =0, c = 0, r = 0; i < total; i++, c++)
-      {
-        if(c == column)
-        {
-          c = 0;
-          r++;
-        }
-        View oImageView = new View(this.getContext());
-        oImageView.setBackgroundColor(Color.RED);
-        GridLayout.LayoutParams param =new GridLayout.LayoutParams();
-        param.height =  10;
-        param.width = 10;
-        param.rightMargin = 5;
-        param.topMargin = 5;
-        param.setGravity(Gravity.CENTER);
-        param.columnSpec = GridLayout.spec(c);
-        param.rowSpec = GridLayout.spec(r);
-        oImageView.setLayoutParams (param);
-        this.addView(oImageView);
-      }
-      */
-
-  }
-
   // region Getter & Setters
   public void setBoardViewDelegate(BoardViewDelegate mBoardViewDelegate) {
     this.mBoardViewDelegate = mBoardViewDelegate;
@@ -200,5 +174,9 @@ public class BoardView extends View {
 
   public interface BoardViewDelegate {
     String get(int row, int col);
+
+    int getAlpha (int row, int col);
+
+    void choose(int row, int col);
   }
 }

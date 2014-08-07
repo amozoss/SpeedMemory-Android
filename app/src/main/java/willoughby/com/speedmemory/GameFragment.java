@@ -18,6 +18,7 @@ public class GameFragment extends Fragment implements BoardView.BoardViewDelegat
   private BoardView mBoardView;
   private BoardData mBoardData;
   private Handler mMainHandler;
+  private ChatSocket mChatSocket;
 
   public GameFragment() {
   }
@@ -28,6 +29,7 @@ public class GameFragment extends Fragment implements BoardView.BoardViewDelegat
     SpeedMemoryApplication speedMemoryApplication = (SpeedMemoryApplication)getActivity().getApplication();
     mBoardData = speedMemoryApplication.getBoardData();
     mMainHandler = new Handler(getActivity().getApplicationContext().getMainLooper());
+    mChatSocket = speedMemoryApplication.getChatSocket();
     speedMemoryApplication.getChatSocket().setOnBoardListener(this);
 
   }
@@ -55,9 +57,25 @@ public class GameFragment extends Fragment implements BoardView.BoardViewDelegat
     return number;
   }
 
+  @Override
+  public int getAlpha(int row, int col) {
+    if (mBoardData != null) {
+      return mBoardData.getAlpha(row, col);
+    }
+    return 0;
+  }
+
 
   @Override
-  public void board() {
+  public void choose(int row, int col) {
+    if (mChatSocket != null) {
+      mChatSocket.emitChoose(row, col);
+    }
+  }
+
+
+  @Override
+  public void updateBoard() {
     mMainHandler.post(new Runnable() {
       @Override
       public void run() {

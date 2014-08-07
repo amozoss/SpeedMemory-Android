@@ -33,23 +33,37 @@ public class ChatSocket {
   private SocketIOClient         mSocketClient;
   private SpeedMemoryApplication mSpeedMemoryApplication;
   private boolean                mIsConnecting;
-  private BoardData mBoardData;
+  private BoardData              mBoardData;
 
+
+
+
+  private onConnectionListener mOnConnectionListener;
 
 
 
   private onBoardListener mOnBoardListener;
+  private String          mName;
 
   ConnectCallback mConnectCallback = new ConnectCallback() {
     @Override
     public void onConnectCompleted(Exception ex, SocketIOClient client) {
       if (ex != null) {
         ex.printStackTrace();
+        mIsConnecting = false;
+        if (mOnConnectionListener != null) {
+          mOnConnectionListener.exception(ex);
+        }
+
         return;
       } else {
         if (client.isConnected()) {
           mSocketClient = client;
-          emitRegister("Dan");
+          if (mOnConnectionListener != null) {
+            mOnConnectionListener.connected();
+          }
+
+          emitRegister(mName == null || "".equals(mName) ? "No name" : mName);
         }
 
         client.setDisconnectCallback(new DisconnectCallback() {
@@ -102,18 +116,17 @@ public class ChatSocket {
           @Override
           public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
             try {
-              // TODO ack token
               JSONArray arr = jsonArray.getJSONArray(0);
               mBoardData.setBoard(arr);
-              if (mOnBoardListener != null) { mOnBoardListener.board();}
+              if (mOnBoardListener != null) {
+                mOnBoardListener.updateBoard();
+              }
               Log.d("SOCKET-ON-board", jsonArray.toString());
             } catch (JSONException e) {
               e.printStackTrace();
             } catch (JsonSyntaxException e) {
               e.printStackTrace();
             }
-            // SOCKET-ON-board﹕ [{"Wz1xjfyei0WrnUG3mfj3":{"score":0,"id":"Wz1xjfyei0WrnUG3mfj3","name":"Dan"}}]
-            // SOCKET-ON-board﹕ [[[8,5,5,2,2,2,9,6,1,6],[7,8,4,7,2,3,2,2,4,5],[9,4,4,1,4,9,10,6,10,8],[1,4,3,9,4,4,9,3,3,6],[5,6,6,8,1,3,10,5,6,3],[5,7,10,9,8,8,1,8,10,7],[3,3,1,8,7,4,10,8,10,5],[6,1,5,6,9,2,2,5,1,8],[2,10,7,10,3,7,9,7,7,5],[1,2,10,1,9,6,9,7,4,3]]]
 
           }
         });
@@ -125,10 +138,22 @@ public class ChatSocket {
           }
         });
 
+
         client.on("choose", new EventCallback() {
           @Override
           public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
             Log.d("SOCKET-ON-choose", jsonArray.toString());
+            try {
+              JSONObject choice = jsonArray.getJSONObject(0);
+              mBoardData.setChoice(choice.getString("id"), choice.getInt("y"), choice.getInt("x"));
+              if (mOnBoardListener != null) {
+                mOnBoardListener.updateBoard();
+              }
+            } catch (JSONException e) {
+              e.printStackTrace();
+            } catch (JsonSyntaxException e) {
+              e.printStackTrace();
+            }
           }
         });
 
@@ -152,12 +177,20 @@ public class ChatSocket {
   }
 
 
-  public void connect() {
+  public void connect(String serverAddress, String name) {
+    mName = name;
     if (mSocketClient == null && !mIsConnecting) {
       mIsConnecting = true;
-      String url = "http://192.168.1.106:3000";
-      SocketIOClient.connect(AsyncHttpClient.getDefaultInstance(), url, mConnectCallback);
-      Log.d("SOCKET", "Connected");
+      //String url = "http://192.168.1.106:3000";
+
+      try {
+        SocketIOClient.connect(AsyncHttpClient.getDefaultInstance(), serverAddress, mConnectCallback);
+        Log.d("SOCKET", "Connected");
+      } catch (Exception e) {
+        if (mOnConnectionListener != null) {
+          mOnConnectionListener.exception(e);
+        }
+      }
     }
   }
 
@@ -190,26 +223,58 @@ public class ChatSocket {
       JSONArray params = new JSONArray();
       try {
         object.put("name", name);
-          params.put(object);
-          String json = object.toString();
-          Log.d("SOCKET-EMIT-register", json);
-          mSocketClient.emit("register", params);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        params.put(object);
+        String json = object.toString();
+        Log.d("SOCKET-EMIT-register", json);
+        mSocketClient.emit("register", params);
+      } catch (Exception e) {
+        e.printStackTrace();
       }
     }
+  }
 
 
-
-
-    // region: Getters & Setters
-    public void setOnBoardListener(onBoardListener mOnBoardListener) {
-      this.mOnBoardListener = mOnBoardListener;
-    }
-    // endregion
-
-    public interface onBoardListener {
-      void board();
+  public void emitChoose(int x, int y) {
+    if (mSocketClient.isConnected()) {
+      JSONObject object = new JSONObject();
+      JSONArray params = new JSONArray();
+      try {
+        object.put("x", x);
+        object.put("y", y);
+        params.put(object);
+        String json = object.toString();
+        Log.d("SOCKET-EMIT-choose", json);
+        mSocketClient.emit("choose", params);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
   }
+
+
+
+  // region: Getters & Setters
+  public void setOnBoardListener(onBoardListener mOnBoardListener) {
+    this.mOnBoardListener = mOnBoardListener;
+  }
+
+
+  public void setOnConnectionListener(onConnectionListener onConnectionListener) {
+    this.mOnConnectionListener = onConnectionListener;
+  }
+  // endregion
+
+
+  public interface onBoardListener {
+
+    void updateBoard();
+  }
+
+
+  public interface onConnectionListener {
+
+    void connected();
+
+    void exception(Exception ex);
+  }
+}

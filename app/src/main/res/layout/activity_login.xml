@@ -36,16 +36,22 @@
                 android:orientation="vertical">
 
                 <AutoCompleteTextView
-                    android:id="@+id/activity_login_server_view"
+                  android:id="@+id/login_name_view"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:hint="@string/prompt_name"
+                  android:maxLines="1"
+                  android:singleLine="true"/>
+                <AutoCompleteTextView
+                    android:id="@+id/login_server_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_server"
-                    android:inputType="textEmailAddress"
                     android:maxLines="1"
                     android:singleLine="true"/>
 
                 <Button
-                    android:id="@+id/email_sign_in_button"
+                    android:id="@+id/login_log_in_button"
                     style="?android:textAppearanceSmall"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

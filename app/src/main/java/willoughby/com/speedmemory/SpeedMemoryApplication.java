@@ -23,7 +23,6 @@ public class SpeedMemoryApplication extends Application {
     mBoardData = new BoardData();
     mChatSocket = new ChatSocket(this, mBoardData);
     isLoggedIn = false;
-    mChatSocket.connect();
   }
 
 
