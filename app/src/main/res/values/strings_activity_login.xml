@@ -1,0 +1,8 @@
+<resources>
+        <string name="title_activity_login">Login in</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_server">Server address</string>
+    <string name="action_log_in">Log in</string>
+    <string name="error_field_required">This field is required</string>
+</resources>
