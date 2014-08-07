@@ -4,6 +4,8 @@ package willoughby.com.speedmemory;
 
 import android.app.Application;
 
+import willoughby.com.speedmemory.model.BoardData;
+
 
 
 /**
@@ -15,7 +17,7 @@ public class SpeedMemoryApplication extends Application {
 
   private ChatSocket mChatSocket;
   private BoardData  mBoardData;
-  private boolean isLoggedIn;
+  private boolean    isLoggedIn;
 
 
   @Override

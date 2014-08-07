@@ -2,6 +2,10 @@ package willoughby.com.speedmemory;
 
 
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -21,6 +25,8 @@ import com.koushikdutta.async.http.socketio.StringCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import willoughby.com.speedmemory.model.BoardData;
 
 
 
@@ -127,7 +133,6 @@ public class ChatSocket {
             } catch (JsonSyntaxException e) {
               e.printStackTrace();
             }
-
           }
         });
 
@@ -161,6 +166,46 @@ public class ChatSocket {
           @Override
           public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
             Log.d("SOCKET-ON-players", jsonArray.toString());
+            try {
+              ArrayList<String> playerData = new ArrayList<String>();
+              JSONObject playerDict = jsonArray.getJSONObject(0);
+              Iterator<?> keys = playerDict.keys();
+
+              ArrayList<String> tempPlayers = new ArrayList<String>();
+              while (keys.hasNext()) {
+                String key = (String)keys.next();
+                if (playerDict.get(key) instanceof JSONObject) {
+                  JSONObject p = playerDict.getJSONObject(key);
+                  String player = p.getString("name") + " " + p.getString("score");
+                  tempPlayers.add(player);
+                }
+              }
+              // condense (kinda ghetto)
+              int totalSize = tempPlayers.size();
+              int count = 0;
+              String combined = "";
+              for (String player : tempPlayers) {
+                if (totalSize >= 2 && count == 0) {
+                  combined = player;
+                  totalSize--;
+                  count++;
+                } else if (count == 1) {
+                  combined += "                     " + player;
+                  totalSize--;
+                  count = 0;
+                  playerData.add(combined);
+                } else {
+                  playerData.add(player);
+                }
+              }
+
+
+              if (mOnBoardListener != null) {
+                mOnBoardListener.updatePlayers(playerData);
+              }
+            } catch (JSONException e) {
+              e.printStackTrace();
+            }
           }
         });
       }
@@ -268,6 +313,8 @@ public class ChatSocket {
   public interface onBoardListener {
 
     void updateBoard();
+
+    void updatePlayers(List<String> players);
   }
 
 

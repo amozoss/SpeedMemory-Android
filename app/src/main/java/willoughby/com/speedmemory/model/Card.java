@@ -1,4 +1,4 @@
-package willoughby.com.speedmemory;
+package willoughby.com.speedmemory.model;
 
 
 
@@ -24,6 +24,7 @@ public class Card {
     this.x = x;
     this.y = y;
   }
+
 
   public Card(Rect rect, int x, int y) {
     this.rect = rect;

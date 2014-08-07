@@ -2,12 +2,21 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:id="@+id/fragment_game"
   android:layout_width="match_parent"
+  android:orientation="vertical"
   android:layout_height="match_parent">
 
- <willoughby.com.speedmemory.BoardView
+ <willoughby.com.speedmemory.views.BoardView
    android:background="@color/light_purple"
    android:id="@+id/fragment_game_board_view"
+   android:layout_width="match_parent"
+   android:layout_weight="4"
+   android:layout_height="0dp" />
+
+ <ListView
+   android:background="@color/white"
+   android:id="@+id/fragment_game_score_listview"
    android:layout_width="wrap_content"
-   android:layout_height="wrap_content" />
+   android:layout_weight="1"
+   android:layout_height="0dp" />
 
 </LinearLayout>

@@ -42,19 +42,23 @@ public class LoginActivity extends Activity implements ChatSocket.onConnectionLi
 
     mServerView = (AutoCompleteTextView)findViewById(R.id.login_server_view);
     mNameView = (AutoCompleteTextView)findViewById(R.id.login_name_view);
-    mNameView.setText("dan");
+    //mNameView.setText("dan");
     mServerView.setText("http://192.168.1.19:3000");
     mProgressView = findViewById(R.id.login_progress);
     mContentView = findViewById(R.id.login_form);
-    mLoginButton = (Button) findViewById(R.id.login_log_in_button);
+    mLoginButton = (Button)findViewById(R.id.login_log_in_button);
     mLoginButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
         attemptLogin();
       }
     });
+  }
 
 
+  @Override
+  public void onBackPressed() {
+    // do nothing
   }
 
 
@@ -89,7 +93,6 @@ public class LoginActivity extends Activity implements ChatSocket.onConnectionLi
     });
 
     mChatSocket.connect(serverAddress, name);
-
   }
 
 

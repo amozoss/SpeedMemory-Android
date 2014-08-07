@@ -1,4 +1,4 @@
-package willoughby.com.speedmemory;
+package willoughby.com.speedmemory.model;
 
 
 
@@ -19,13 +19,15 @@ import org.json.JSONException;
  */
 public class BoardData {
 
-  private       JSONArray                    mBoardData;
-  private       HashMap<String, Queue<Card>> mPreviousChoices;
-  public static int                          HIGHLIGHT_COUNT = 4; // how many numbers to keep showing
+  private JSONArray                    mBoardData;
+  private HashMap<String, Queue<Card>> mPreviousChoices;
+  public static int HIGHLIGHT_COUNT = 4; // how many numbers to keep showing
+
 
   public BoardData() {
     mPreviousChoices = new HashMap<String, Queue<Card>>();
   }
+
 
   public void setBoard(JSONArray jsonArray) {
     mBoardData = jsonArray;
@@ -45,6 +47,7 @@ public class BoardData {
     return null;
   }
 
+
   public int getAlpha(int row, int col) {
     int a = 0;
     double count = 0.0;
@@ -53,9 +56,9 @@ public class BoardData {
       Iterator<Card> it = q.iterator();
       while (it.hasNext()) {
         Card card = it.next();
-        count ++;
+        count++;
         if (card.equals(toFind)) {
-          return (int)(255.0 * (count/q.size()));
+          return (int)(255.0 * (count / q.size()));
         }
       }
       count = 0.0;
@@ -72,8 +75,7 @@ public class BoardData {
       if (queue.size() > HIGHLIGHT_COUNT) {
         queue.remove();
       }
-    }
-    else {
+    } else {
       Queue<Card> queue = new ConcurrentLinkedQueue<Card>();
       queue.add(card);
       mPreviousChoices.put(id, queue);

@@ -1,4 +1,4 @@
-package willoughby.com.speedmemory;
+package willoughby.com.speedmemory.views;
 
 
 
@@ -15,6 +15,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import willoughby.com.speedmemory.model.Card;
+import willoughby.com.speedmemory.R;
+
 
 
 /**
@@ -30,7 +33,7 @@ public class BoardView extends View {
   Paint mPaint;
   Paint mPaintPurple;
   Paint mPaintFont;
-  private ArrayList<Card> mCards;
+  private ArrayList<Card>   mCards;
   private BoardViewDelegate mBoardViewDelegate;
 
 
