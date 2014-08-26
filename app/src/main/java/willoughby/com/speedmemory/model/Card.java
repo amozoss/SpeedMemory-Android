@@ -15,6 +15,8 @@ public class Card {
   private int x;
   private int y;
 
+  private int color;
+
 
 
   private Rect rect;
@@ -23,6 +25,13 @@ public class Card {
   public Card(int x, int y) {
     this.x = x;
     this.y = y;
+  }
+
+
+  public Card(int x, int y, int color) {
+    this.x = x;
+    this.y = y;
+    this.color = color;
   }
 
 
@@ -53,6 +62,16 @@ public class Card {
 
 
   // region Getter & Setters
+
+  public int getColor() {
+    return color;
+  }
+
+
+  public void setColor(int color) {
+    this.color = color;
+  }
+
   public int getX() {
     return x;
   }

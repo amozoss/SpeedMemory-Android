@@ -34,6 +34,10 @@ public class BoardData {
     Log.d("BOARDDATA", "setBoard");
   }
 
+  public void setPlayers(JSONArray jsonArray) {
+
+  }
+
 
   public Object get(int row, int col) {
     if (mBoardData != null) {
@@ -66,9 +70,35 @@ public class BoardData {
     return (int)count;
   }
 
+  public int getColor(int row, int col) {
+    Card toFind = new Card(row, col);
+    for (Queue<Card> q : mPreviousChoices.values()) {
+      Iterator<Card> it = q.iterator();
+      while (it.hasNext()) {
+        Card card = it.next();
+        if (card.equals(toFind)) {
+          return card.getColor();
+        }
+      }
+    }
+    return -1;
+  }
 
-  public void setChoice(String id, int x, int y) {
-    Card card = new Card(x, y);
+  private void removePreviousChoice(Card toFind) {
+    for (Queue<Card> q : mPreviousChoices.values()) {
+      Iterator<Card> it = q.iterator();
+      while (it.hasNext()) {
+        Card card = it.next();
+        if (card.equals(toFind)) {
+          q.remove(card);
+        }
+      }
+    }
+  }
+
+  public void setChoice(String id, int x, int y, int color) {
+    Card card = new Card(x, y, color);
+    removePreviousChoice(card);
     if (mPreviousChoices.containsKey(id)) {
       Queue<Card> queue = mPreviousChoices.get(id);
       queue.add(card);
@@ -80,5 +110,9 @@ public class BoardData {
       queue.add(card);
       mPreviousChoices.put(id, queue);
     }
+  }
+
+  public void clear() {
+    mPreviousChoices.clear();
   }
 }

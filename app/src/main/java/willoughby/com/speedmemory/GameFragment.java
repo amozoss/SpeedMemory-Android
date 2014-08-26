@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import willoughby.com.speedmemory.model.BoardData;
 import willoughby.com.speedmemory.views.BoardView;
@@ -29,6 +30,7 @@ public class GameFragment extends Fragment implements BoardView.BoardViewDelegat
   private ChatSocket           mChatSocket;
   private ListView             mScoreListView;
   private ArrayAdapter<String> mAdapter;
+  private Handler               mHandler;
 
 
   public GameFragment() {
@@ -38,6 +40,9 @@ public class GameFragment extends Fragment implements BoardView.BoardViewDelegat
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    mMainHandler = new Handler(getActivity().getApplicationContext().getMainLooper());
+
     SpeedMemoryApplication speedMemoryApplication = (SpeedMemoryApplication)getActivity().getApplication();
     mBoardData = speedMemoryApplication.getBoardData();
     mMainHandler = new Handler(getActivity().getApplicationContext().getMainLooper());
@@ -83,12 +88,35 @@ public class GameFragment extends Fragment implements BoardView.BoardViewDelegat
 
 
   @Override
+  public int getColor(int row, int col) {
+    if (mBoardData != null) {
+      return mBoardData.getColor(row, col);
+    }
+    return 0;
+  }
+
+
+  @Override
   public void choose(int row, int col) {
     if (mChatSocket != null) {
       mChatSocket.emitChoose(row, col);
     }
   }
 
+
+  @Override
+  public void playerScored(final String name, final int amount) {
+
+    mMainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        Toast.makeText(getActivity().getApplicationContext(), name + " " + amount,
+                       Toast.LENGTH_SHORT).show();
+
+      }
+    });
+
+  }
 
   @Override
   public void updateBoard() {

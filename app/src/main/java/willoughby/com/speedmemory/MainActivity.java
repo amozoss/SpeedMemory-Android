@@ -47,6 +47,7 @@ public class MainActivity extends Activity {
       SpeedMemoryApplication speedMemoryApplication = (SpeedMemoryApplication)getApplication();
       speedMemoryApplication.setLoggedIn(false);
       speedMemoryApplication.getChatSocket().disconnect();
+      speedMemoryApplication.getBoardData().clear();
       startActivity(new Intent(this, LoginActivity.class));
       return true;
     }

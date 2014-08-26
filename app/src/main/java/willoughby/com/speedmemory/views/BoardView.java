@@ -152,11 +152,13 @@ public class BoardView extends View {
           }
           else {
             mCards.add(new Card(rect, row, col));
+            int colorNum = mBoardViewDelegate.getColor(row, col);
+            int alpha = mBoardViewDelegate.getAlpha(row, col);
+            int color = getColor(alpha, colorNum);
+            mPaint.setColor(color);
+
             mCanvas.drawRect(rect, mPaint);
-            double numb = Double.parseDouble(number);
-            double a = (255 * (1.0/numb));
-            int al = (int)a;
-            mPaintFont.setAlpha(mBoardViewDelegate.getAlpha(row, col));
+            mPaintFont.setAlpha(alpha);
             mCanvas.drawText(number, rect.exactCenterX(), rect.exactCenterY() + 15, mPaintFont);
           }
         }
@@ -166,6 +168,42 @@ public class BoardView extends View {
 
     invalidate();
 }
+
+  private int getColor(int alpha, int colorNum) {
+    int color;
+    if (alpha == 255) {
+      switch (colorNum) {
+        case -1:
+          color = Color.BLACK;
+        case 0:
+          color = Color.BLACK;
+          break;
+        case 1:
+          color = Color.GREEN;
+          break;
+        case 2:
+          color = Color.BLUE;
+          break;
+        case 3:
+          color = Color.RED;
+          break;
+        case 4:
+          color = Color.CYAN;
+          break;
+        case 5:
+          color = Color.MAGENTA;
+          break;
+        default:
+          color = Color.BLACK;
+          break;
+      }
+    }
+    else {
+      color = Color.BLACK;
+    }
+    return color;
+  }
+
 
 
   // region Getter & Setters
@@ -178,7 +216,9 @@ public class BoardView extends View {
   public interface BoardViewDelegate {
     String get(int row, int col);
 
-    int getAlpha (int row, int col);
+    int getAlpha(int row, int col);
+
+    int getColor(int row, int col);
 
     void choose(int row, int col);
   }

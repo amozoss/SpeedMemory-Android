@@ -150,7 +150,7 @@ public class ChatSocket {
             Log.d("SOCKET-ON-choose", jsonArray.toString());
             try {
               JSONObject choice = jsonArray.getJSONObject(0);
-              mBoardData.setChoice(choice.getString("id"), choice.getInt("y"), choice.getInt("x"));
+              mBoardData.setChoice(choice.getString("id"), choice.getInt("y"), choice.getInt("x"), choice.getInt("color"));
               if (mOnBoardListener != null) {
                 mOnBoardListener.updateBoard();
               }
@@ -161,6 +161,24 @@ public class ChatSocket {
             }
           }
         });
+
+        client.on("scored", new EventCallback() {
+          @Override
+          public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
+            Log.d("SOCKET-ON-scored", jsonArray.toString());
+            try {
+              JSONObject scored = jsonArray.getJSONObject(0);
+              if (mOnBoardListener != null) {
+                mOnBoardListener.playerScored(scored.getString("name"), scored.getInt("amount"));
+              }
+            } catch (JSONException e) {
+              e.printStackTrace();
+            } catch (JsonSyntaxException e) {
+              e.printStackTrace();
+            }
+          }
+        });
+
 
         client.on("players", new EventCallback() {
           @Override
@@ -280,7 +298,7 @@ public class ChatSocket {
 
 
   public void emitChoose(int x, int y) {
-    if (mSocketClient.isConnected()) {
+    if (mSocketClient != null && mSocketClient.isConnected()) {
       JSONObject object = new JSONObject();
       JSONArray params = new JSONArray();
       try {
@@ -315,6 +333,8 @@ public class ChatSocket {
     void updateBoard();
 
     void updatePlayers(List<String> players);
+
+    void playerScored(String name, int amount);
   }
 
 
