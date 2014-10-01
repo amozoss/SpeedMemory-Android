@@ -135,8 +135,8 @@ public class BoardView extends View {
 
   private void drawBoard() {
 
-    int width = (mWidth / ROWS) - PADDING;
-    int height = (mHeight / COLS) - PADDING;
+    int height = (mHeight / ROWS) - PADDING;
+    int width = (mWidth / COLS) - PADDING;
     int count = 0;
     mCards.clear();
     for (int row = 0; row < ROWS ; row++) {
@@ -192,6 +192,9 @@ public class BoardView extends View {
           break;
         case 5:
           color = Color.MAGENTA;
+          break;
+        case 6:
+          color = Color.DKGRAY;
           break;
         default:
           color = Color.BLACK;

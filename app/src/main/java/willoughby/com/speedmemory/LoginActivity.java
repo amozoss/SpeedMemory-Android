@@ -43,7 +43,7 @@ public class LoginActivity extends Activity implements ChatSocket.onConnectionLi
     mServerView = (AutoCompleteTextView)findViewById(R.id.login_server_view);
     mNameView = (AutoCompleteTextView)findViewById(R.id.login_name_view);
     //mNameView.setText("dan");
-    mServerView.setText("http://192.168.1.106:3000");
+    mServerView.setText("http://speed-memory.herokuapp.com/");
     mProgressView = findViewById(R.id.login_progress);
     mContentView = findViewById(R.id.login_form);
     mLoginButton = (Button)findViewById(R.id.login_log_in_button);
