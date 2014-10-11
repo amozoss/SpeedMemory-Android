@@ -70,18 +70,19 @@ public class BoardData {
     return (int)count;
   }
 
-  public int getColor(int row, int col) {
+  public String getColor(int row, int col) {
     Card toFind = new Card(row, col);
     for (Queue<Card> q : mPreviousChoices.values()) {
       Iterator<Card> it = q.iterator();
       while (it.hasNext()) {
         Card card = it.next();
-        if (card.equals(toFind)) {
+        // only want to return the color for the last item in the queue. Not that efficient but works
+        if (card.equals(toFind) && !it.hasNext()) {
           return card.getColor();
         }
       }
     }
-    return -1;
+    return "#000000";
   }
 
   private void removePreviousChoice(Card toFind) {
@@ -96,7 +97,7 @@ public class BoardData {
     }
   }
 
-  public void setChoice(String id, int x, int y, int color) {
+  public void setChoice(String id, int x, int y, String color) {
     Card card = new Card(x, y, color);
     removePreviousChoice(card);
     if (mPreviousChoices.containsKey(id)) {

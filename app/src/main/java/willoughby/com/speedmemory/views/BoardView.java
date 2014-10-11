@@ -24,6 +24,9 @@ import willoughby.com.speedmemory.R;
  * Created by dan on 7/19/14.
  */
 public class BoardView extends View {
+  private static final int DEFAULT_ROWS = 10;
+  private static final int DEFAULT_COLS = 10;
+  private static final int DEFAULT_PADDING = 1;
 
   private Context mContext;
   private int     mWidth;
@@ -35,6 +38,10 @@ public class BoardView extends View {
   Paint mPaintFont;
   private ArrayList<Card>   mCards;
   private BoardViewDelegate mBoardViewDelegate;
+  private int mRows;
+  private int mCols;
+  private int mPadding;
+  private boolean mIsCleared;
 
 
   public BoardView(Context context) {
@@ -56,6 +63,7 @@ public class BoardView extends View {
 
 
   public void init(Context context) {
+    mIsCleared = false;
     mPaint = new Paint();
     mPaint.setColor(Color.BLACK);
     mPaint.setStyle(Paint.Style.FILL);
@@ -102,13 +110,6 @@ public class BoardView extends View {
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     mHeight = View.MeasureSpec.getSize(heightMeasureSpec);
     mWidth = View.MeasureSpec.getSize(widthMeasureSpec);
-
-
-    //width = Math.min(width, height);
-    //height = Math.min(width,height);
-
-
-    //MUST CALL THIS
     setMeasuredDimension(mWidth, mHeight);
 
     mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
@@ -117,44 +118,35 @@ public class BoardView extends View {
   }
 
 
-  /*
-  @Override
-  protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-    Log.i("VolumeGauge", "Size changed to " + w + "x" + h);
 
-    // This is where you divide up the view into 64
-    // pieces and paint them.
-    generateBackground();
-  }
-  */
-
-
-  final static int ROWS = 10;
-  final static int COLS = 10;
-  final static int PADDING = 1;
 
   private void drawBoard() {
+    int padding = getPadding();
+    int rows = getRows();
+    int cols = getCols();
 
-    int height = (mHeight / ROWS) - PADDING;
-    int width = (mWidth / COLS) - PADDING;
+    int height = (mHeight / rows) - padding;
+    int width = (mWidth / cols) - padding;
     int count = 0;
     mCards.clear();
-    for (int row = 0; row < ROWS ; row++) {
-      for (int col = 0; col < COLS; col++) {
-        Rect rect = new Rect(col * width + ((col + 1) * PADDING),
-                 row * height + ((row + 1) * PADDING),
-                 (col + 1) * width + (col * PADDING),
-                 (row + 1) * height + (row * PADDING));
+    if (mIsCleared) {
+      mCanvas.drawColor(Color.WHITE);
+    }
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < cols; col++) {
+        Rect rect = new Rect(col * width + ((col + 1) * padding),
+                             row * height + ((row + 1) * padding),
+                             (col + 1) * width + (col * padding),
+                             (row + 1) * height + (row * padding));
         if (mBoardViewDelegate != null) {
           String number = mBoardViewDelegate.get(row, col);
           if ("".equals(number)) {
             mCanvas.drawRect(rect, mPaintPurple);
-          }
-          else {
+          } else {
             mCards.add(new Card(rect, row, col));
-            int colorNum = mBoardViewDelegate.getColor(row, col);
+            String colorNum = mBoardViewDelegate.getColor(row, col);
             int alpha = mBoardViewDelegate.getAlpha(row, col);
-            int color = getColor(alpha, colorNum);
+            int color = Color.parseColor(colorNum);
             mPaint.setColor(color);
 
             mCanvas.drawRect(rect, mPaint);
@@ -164,64 +156,60 @@ public class BoardView extends View {
         }
       }
     }
-
-
-    invalidate();
-}
-
-  private int getColor(int alpha, int colorNum) {
-    int color;
-    if (alpha == 255) {
-      switch (colorNum) {
-        case -1:
-          color = Color.BLACK;
-        case 0:
-          color = Color.BLACK;
-          break;
-        case 1:
-          color = Color.GREEN;
-          break;
-        case 2:
-          color = Color.BLUE;
-          break;
-        case 3:
-          color = Color.RED;
-          break;
-        case 4:
-          color = Color.CYAN;
-          break;
-        case 5:
-          color = Color.MAGENTA;
-          break;
-        case 6:
-          color = Color.DKGRAY;
-          break;
-        default:
-          color = Color.BLACK;
-          break;
-      }
-    }
-    else {
-      color = Color.BLACK;
-    }
-    return color;
   }
-
 
 
   // region Getter & Setters
   public void setBoardViewDelegate(BoardViewDelegate mBoardViewDelegate) {
     this.mBoardViewDelegate = mBoardViewDelegate;
   }
+
+  public boolean isCleared() {
+    return mIsCleared;
+  }
+
+  public void setIsCleared(boolean isCleared) {
+    this.mIsCleared = isCleared;
+  }
+
+  public int getCols() {
+    return (mCols == 0 ? DEFAULT_COLS : mCols);
+  }
+
+
+  public void setCols(int mCols) {
+    this.mCols = mCols;
+  }
+
+
+  public int getPadding() {
+    return (mPadding == 0 ? DEFAULT_PADDING : mPadding);
+  }
+
+
+  public void setPadding(int mPadding) {
+    this.mPadding = mPadding;
+  }
+
+
+  public int getRows() {
+    return (mRows == 0 ? DEFAULT_ROWS : mRows);
+  }
+
+
+  public void setRows(int mRows) {
+    this.mRows = mRows;
+  }
   // endregion
 
 
   public interface BoardViewDelegate {
+
     String get(int row, int col);
 
     int getAlpha(int row, int col);
 
-    int getColor(int row, int col);
+    String getColor(int row, int col);
 
     void choose(int row, int col);
   }

@@ -2,10 +2,7 @@ package willoughby.com.speedmemory;
 
 
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import android.os.Handler;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -27,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import willoughby.com.speedmemory.model.BoardData;
+import willoughby.com.speedmemory.model.PlayerData;
 
 
 
@@ -40,6 +38,8 @@ public class ChatSocket {
   private SpeedMemoryApplication mSpeedMemoryApplication;
   private boolean                mIsConnecting;
   private BoardData              mBoardData;
+  private PlayerData mPlayerData;
+  private Handler                mMainHandler;
 
 
 
@@ -122,11 +122,16 @@ public class ChatSocket {
           @Override
           public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
             try {
-              JSONArray arr = jsonArray.getJSONArray(0);
-              mBoardData.setBoard(arr);
-              if (mOnBoardListener != null) {
-                mOnBoardListener.updateBoard();
-              }
+              final JSONArray arr = jsonArray.getJSONArray(0);
+              mMainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                  mBoardData.setBoard(arr);
+                  if (mOnBoardListener != null) {
+                    mOnBoardListener.updateBoard();
+                  }
+                }
+              });
               Log.d("SOCKET-ON-board", jsonArray.toString());
             } catch (JSONException e) {
               e.printStackTrace();
@@ -136,96 +141,72 @@ public class ChatSocket {
           }
         });
 
-        client.on("mouse", new EventCallback() {
-          @Override
-          public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
-            Log.d("SOCKET-ON-mouse", jsonArray.toString());
-          }
-        });
-
-
         client.on("choose", new EventCallback() {
           @Override
           public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
             Log.d("SOCKET-ON-choose", jsonArray.toString());
             try {
-              JSONObject choice = jsonArray.getJSONObject(0);
-              mBoardData.setChoice(choice.getString("id"), choice.getInt("y"), choice.getInt("x"), choice.getInt("color"));
-              if (mOnBoardListener != null) {
-                mOnBoardListener.updateBoard();
-              }
+              final JSONObject choice = jsonArray.getJSONObject(0);
+              mMainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                  try {
+                    mBoardData.setChoice(choice.getString("id"), choice.getInt("y"), choice.getInt("x"), choice.getString("color"));
+                  } catch (JSONException e) {
+                    e.printStackTrace();
+                  }
+                  if (mOnBoardListener != null) {
+                    mOnBoardListener.updateBoard();
+                  }
+                }
+              });
             } catch (JSONException e) {
-              e.printStackTrace();
-            } catch (JsonSyntaxException e) {
               e.printStackTrace();
             }
           }
         });
+
+        client.on("leaderboard", new EventCallback() {
+                    @Override
+                    public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
+                      Log.d("SOCKET-ON-leaderboard", jsonArray.toString());
+                      try {
+                        final JSONArray arr = jsonArray.getJSONArray(0);
+                        mMainHandler.post(new Runnable() {
+                          @Override
+                          public void run() {
+                            mPlayerData.setPlayerData(arr);
+                            if (mOnBoardListener != null) {
+                              mOnBoardListener.updateLeaderboard();
+                            }
+                          }
+                        });
+                      }
+                      catch (JSONException e) {
+                        e.printStackTrace();
+                      }
+                    }
+                  }
+        );
+
 
         client.on("scored", new EventCallback() {
-          @Override
-          public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
-            Log.d("SOCKET-ON-scored", jsonArray.toString());
-            try {
-              JSONObject scored = jsonArray.getJSONObject(0);
-              if (mOnBoardListener != null) {
-                mOnBoardListener.playerScored(scored.getString("name"), scored.getInt("amount"));
-              }
-            } catch (JSONException e) {
-              e.printStackTrace();
-            } catch (JsonSyntaxException e) {
-              e.printStackTrace();
-            }
-          }
-        });
-
-
-        client.on("players", new EventCallback() {
-          @Override
-          public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
-            Log.d("SOCKET-ON-players", jsonArray.toString());
-            try {
-              ArrayList<String> playerData = new ArrayList<String>();
-              JSONObject playerDict = jsonArray.getJSONObject(0);
-              Iterator<?> keys = playerDict.keys();
-
-              ArrayList<String> tempPlayers = new ArrayList<String>();
-              while (keys.hasNext()) {
-                String key = (String)keys.next();
-                if (playerDict.get(key) instanceof JSONObject) {
-                  JSONObject p = playerDict.getJSONObject(key);
-                  String player = p.getString("name") + " " + p.getString("score");
-                  tempPlayers.add(player);
-                }
-              }
-              // condense (kinda ghetto)
-              int totalSize = tempPlayers.size();
-              int count = 0;
-              String combined = "";
-              for (String player : tempPlayers) {
-                if (totalSize >= 2 && count == 0) {
-                  combined = player;
-                  totalSize--;
-                  count++;
-                } else if (count == 1) {
-                  combined += "                     " + player;
-                  totalSize--;
-                  count = 0;
-                  playerData.add(combined);
-                } else {
-                  playerData.add(player);
-                }
-              }
-
-
-              if (mOnBoardListener != null) {
-                mOnBoardListener.updatePlayers(playerData);
-              }
-            } catch (JSONException e) {
-              e.printStackTrace();
-            }
-          }
-        });
+                    @Override
+                    public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
+                      Log.d("SOCKET-ON-scored", jsonArray.toString());
+                      try {
+                        JSONObject scored = jsonArray.getJSONObject(0);
+                        if (mOnBoardListener != null) {
+                          mOnBoardListener.playerScored(scored.getString("color"), scored.getInt("amount"));
+                        }
+                      } catch (JSONException e) {
+                        e.printStackTrace();
+                      } catch (JsonSyntaxException e) {
+                        e.printStackTrace();
+                      }
+                    }
+                  }
+        );
       }
     }
   };
@@ -233,10 +214,12 @@ public class ChatSocket {
 
 
 
-  public ChatSocket(SpeedMemoryApplication speedMemoryApplication, BoardData boardData) {
+  public ChatSocket(SpeedMemoryApplication speedMemoryApplication, BoardData boardData, PlayerData playerData, Handler handler) {
     mIsConnecting = false;
     mBoardData = boardData;
+    mPlayerData = playerData;
     mSpeedMemoryApplication = speedMemoryApplication;
+    mMainHandler = handler;
   }
 
 
@@ -332,7 +315,7 @@ public class ChatSocket {
 
     void updateBoard();
 
-    void updatePlayers(List<String> players);
+    void updateLeaderboard();
 
     void playerScored(String name, int amount);
   }

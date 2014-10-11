@@ -3,8 +3,11 @@ package willoughby.com.speedmemory;
 
 
 import android.app.Application;
+import android.os.Handler;
 
 import willoughby.com.speedmemory.model.BoardData;
+import willoughby.com.speedmemory.model.FeedData;
+import willoughby.com.speedmemory.model.PlayerData;
 
 
 
@@ -17,13 +20,17 @@ public class SpeedMemoryApplication extends Application {
 
   private ChatSocket mChatSocket;
   private BoardData  mBoardData;
+  private FeedData mFeedData;
+  private PlayerData mPlayerData;
   private boolean    isLoggedIn;
 
 
   @Override
   public void onCreate() {
     mBoardData = new BoardData();
-    mChatSocket = new ChatSocket(this, mBoardData);
+    mFeedData = new FeedData();
+    mPlayerData = new PlayerData();
+    mChatSocket = new ChatSocket(this, mBoardData, mPlayerData, new Handler(getMainLooper()));
     isLoggedIn = false;
   }
 
@@ -41,6 +48,15 @@ public class SpeedMemoryApplication extends Application {
 
   public BoardData getBoardData() {
     return mBoardData;
+  }
+
+
+  public FeedData getFeedData() {
+    return mFeedData;
+  }
+
+  public PlayerData getPlayerData() {
+    return mPlayerData;
   }
 
 

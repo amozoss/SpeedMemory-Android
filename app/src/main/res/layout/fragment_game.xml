@@ -5,6 +5,48 @@
   android:orientation="vertical"
   android:layout_height="match_parent">
 
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    android:layout_weight="1.5"
+    android:layout_height="0dp">
+  <LinearLayout
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_weight="6"
+    android:layout_width="10dp">
+  <TextView
+    android:layout_width="match_parent"
+    android:id="@+id/fragment_game_name_text_view"
+    android:layout_marginRight="3dp"
+    android:textSize="30sp"
+    android:gravity="center"
+    android:text="Speed Memory"
+    android:background="@color/light_purple"
+    android:textColor="@color/white"
+    android:layout_weight=".5"
+    android:layout_height="0dp"/>
+
+ <willoughby.com.speedmemory.views.BoardView
+   android:background="@color/white"
+   android:id="@+id/fragment_game_score_view"
+   android:layout_width="match_parent"
+   android:layout_weight="1"
+   android:layout_height="0dp" />
+  </LinearLayout>
+  <LinearLayout
+    android:layout_width="10dp"
+    android:orientation="vertical"
+    android:layout_weight="1"
+    android:layout_height="match_parent">
+ <willoughby.com.speedmemory.views.BoardView
+   android:background="@color/white"
+   android:id="@+id/fragment_game_feed_score_view"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent" />
+
+    </LinearLayout>
+  </LinearLayout>
  <willoughby.com.speedmemory.views.BoardView
    android:background="@color/light_purple"
    android:id="@+id/fragment_game_board_view"
@@ -12,11 +54,5 @@
    android:layout_weight="4"
    android:layout_height="0dp" />
 
- <ListView
-   android:background="@color/white"
-   android:id="@+id/fragment_game_score_listview"
-   android:layout_width="wrap_content"
-   android:layout_weight="1"
-   android:layout_height="0dp" />
 
 </LinearLayout>
