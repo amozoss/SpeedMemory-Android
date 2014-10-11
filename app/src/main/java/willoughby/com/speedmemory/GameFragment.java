@@ -79,6 +79,7 @@ public class GameFragment extends Fragment implements ChatSocket.onBoardListener
   }
 
 
+
   private BoardView.BoardViewDelegate mBoardViewDelegate = new BoardView.BoardViewDelegate() {
     @Override
     public String get(int row, int col) {
@@ -210,5 +211,19 @@ public class GameFragment extends Fragment implements ChatSocket.onBoardListener
         mScoreBoardView.invalidate();
       }
     });
+  }
+
+  @Override
+  public void restart() {
+    mMainHandler.post(new Runnable() {
+      @Override
+      public void run() {
+        mFeedData.clear();
+        mBoardData.clear();
+        mBoardView.invalidate();
+        mFeedScoreBoardView.invalidate();
+      }
+    });
+
   }
 }

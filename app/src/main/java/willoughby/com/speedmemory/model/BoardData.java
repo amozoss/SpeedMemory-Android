@@ -51,7 +51,6 @@ public class BoardData {
     return null;
   }
 
-
   public int getAlpha(int row, int col) {
     int a = 0;
     double count = 0.0;

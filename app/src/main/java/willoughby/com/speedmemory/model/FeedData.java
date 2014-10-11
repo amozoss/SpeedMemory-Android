@@ -41,4 +41,9 @@ public class FeedData {
     return "#FFFFFF";
   }
 
+
+  public void clear() {
+    mFeedItems.clear();
+  }
+
 }

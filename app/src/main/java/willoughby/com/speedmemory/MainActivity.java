@@ -11,6 +11,7 @@ import android.view.MenuItem;
 
 
 public class MainActivity extends Activity {
+  private GameFragment mGameFragment;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -22,8 +23,9 @@ public class MainActivity extends Activity {
       startActivity(new Intent(this, LoginActivity.class));
     }
     if (savedInstanceState == null) {
+      mGameFragment = new GameFragment();
       getFragmentManager().beginTransaction()
-                          .add(R.id.container, new GameFragment())
+                          .add(R.id.container, mGameFragment)
                           .commit();
     }
   }
@@ -43,13 +45,17 @@ public class MainActivity extends Activity {
     // automatically handle clicks on the Home/Up button, so long
     // as you specify a parent activity in AndroidManifest.xml.
     int id = item.getItemId();
+    SpeedMemoryApplication speedMemoryApplication = (SpeedMemoryApplication)getApplication();
     if (id == R.id.action_disconnect) {
-      SpeedMemoryApplication speedMemoryApplication = (SpeedMemoryApplication)getApplication();
       speedMemoryApplication.setLoggedIn(false);
       speedMemoryApplication.getChatSocket().disconnect();
       speedMemoryApplication.getBoardData().clear();
       startActivity(new Intent(this, LoginActivity.class));
+      mGameFragment.restart();
       return true;
+    }
+    else if (id == R.id.action_restart) {
+      speedMemoryApplication.getChatSocket().emitRestart();
     }
     return super.onOptionsItemSelected(item);
   }

@@ -38,7 +38,7 @@ public class ChatSocket {
   private SpeedMemoryApplication mSpeedMemoryApplication;
   private boolean                mIsConnecting;
   private BoardData              mBoardData;
-  private PlayerData mPlayerData;
+  private PlayerData             mPlayerData;
   private Handler                mMainHandler;
 
 
@@ -181,79 +181,89 @@ public class ChatSocket {
                             }
                           }
                         });
-                      }
-                      catch (JSONException e) {
-                        e.printStackTrace();
-                      }
-                    }
-                  }
-        );
-
-
-        client.on("scored", new EventCallback() {
-                    @Override
-                    public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
-                      Log.d("SOCKET-ON-scored", jsonArray.toString());
-                      try {
-                        JSONObject scored = jsonArray.getJSONObject(0);
-                        if (mOnBoardListener != null) {
-                          mOnBoardListener.playerScored(scored.getString("color"), scored.getInt("amount"));
-                        }
                       } catch (JSONException e) {
                         e.printStackTrace();
-                      } catch (JsonSyntaxException e) {
-                        e.printStackTrace();
                       }
                     }
                   }
         );
-      }
+
+
+        client.on("restart", new EventCallback() {
+          @Override
+          public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
+            Log.d("SOCKET-ON-restart", jsonArray.toString());
+            if (mOnBoardListener != null) {
+              mOnBoardListener.restart();
+            }
+          }
+      });
+
+
+      client.on("scored", new EventCallback() {
+                  @Override
+                  public void onEvent(JSONArray jsonArray, Acknowledge acknowledge) {
+                    Log.d("SOCKET-ON-scored", jsonArray.toString());
+                    try {
+                      JSONObject scored = jsonArray.getJSONObject(0);
+                      if (mOnBoardListener != null) {
+                        mOnBoardListener.playerScored(scored.getString("color"), scored.getInt("amount"));
+                      }
+                    } catch (JSONException e) {
+                      e.printStackTrace();
+                    } catch (JsonSyntaxException e) {
+                      e.printStackTrace();
+                    }
+                  }
+                }
+      );
     }
-  };
-
-
-
-
-  public ChatSocket(SpeedMemoryApplication speedMemoryApplication, BoardData boardData, PlayerData playerData, Handler handler) {
-    mIsConnecting = false;
-    mBoardData = boardData;
-    mPlayerData = playerData;
-    mSpeedMemoryApplication = speedMemoryApplication;
-    mMainHandler = handler;
   }
+};
 
 
-  public void connect(String serverAddress, String name) {
-    mName = name;
-    if (mSocketClient == null && !mIsConnecting) {
-      mIsConnecting = true;
-      //String url = "http://192.168.1.106:3000";
 
-      try {
-        SocketIOClient.connect(AsyncHttpClient.getDefaultInstance(), serverAddress, mConnectCallback);
-        Log.d("SOCKET", "Connected");
-      } catch (Exception e) {
-        if (mOnConnectionListener != null) {
-          mOnConnectionListener.exception(e);
-        }
-      }
+
+public ChatSocket(SpeedMemoryApplication speedMemoryApplication,BoardData boardData,PlayerData playerData,Handler handler){
+    mIsConnecting=false;
+    mBoardData=boardData;
+    mPlayerData=playerData;
+    mSpeedMemoryApplication=speedMemoryApplication;
+    mMainHandler=handler;
     }
-  }
 
 
-  public boolean isConnected() {
-    return (mSocketClient != null && mSocketClient.isConnected());
-  }
+public void connect(String serverAddress,String name){
+    mName=name;
+    if(mSocketClient==null&&!mIsConnecting){
+    mIsConnecting=true;
+    //String url = "http://192.168.1.106:3000";
+
+    try{
+    SocketIOClient.connect(AsyncHttpClient.getDefaultInstance(),serverAddress,mConnectCallback);
+    Log.d("SOCKET","Connected");
+    }catch(Exception e){
+    if(mOnConnectionListener!=null){
+    mOnConnectionListener.exception(e);
+    }
+    }
+    }
+    }
 
 
-  public void disconnect() {
-    if (mSocketClient != null && mSocketClient.isConnected()) {
-      try {
-        mIsConnecting = false;
-        mSocketClient.disconnect();
-        mSocketClient = null;
-      } catch (NullPointerException e) {
-        mSocketClient = null; // For some reason it throws NUllPointer, but still disconnects
+public boolean isConnected(){
+    return(mSocketClient!=null&&mSocketClient.isConnected());
+    }
+
+
+public void disconnect(){
+    if(mSocketClient!=null&&mSocketClient.isConnected()){
+    try{
+    mIsConnecting=false;
+    mSocketClient.disconnect();
+    mSocketClient=null;
+    }catch(NullPointerException e){
+    mSocketClient = null; // For some reason it throws NUllPointer, but still disconnects
       } catch (Exception e) {
         e.printStackTrace();
         mSocketClient = null;
@@ -279,6 +289,21 @@ public class ChatSocket {
     }
   }
 
+  public void emitRestart() {
+    if (mSocketClient.isConnected()) {
+      JSONObject object = new JSONObject();
+      JSONArray params = new JSONArray();
+      try {
+        object.put("restart", "true");
+        params.put(object);
+        String json = object.toString();
+        Log.d("SOCKET-EMIT-restart", json);
+        mSocketClient.emit("restart", params);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
 
   public void emitChoose(int x, int y) {
     if (mSocketClient != null && mSocketClient.isConnected()) {
@@ -318,6 +343,8 @@ public class ChatSocket {
     void updateLeaderboard();
 
     void playerScored(String name, int amount);
+
+    void restart();
   }
 
 

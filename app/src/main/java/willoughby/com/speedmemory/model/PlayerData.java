@@ -17,9 +17,12 @@ public class PlayerData {
   private JSONArray mPlayerData;
 
 
+
   public void setPlayerData(JSONArray jsonArray) {
     mPlayerData = jsonArray;
   }
+
+
 
   private JSONObject get(int row, int col) {
     if (mPlayerData != null) {

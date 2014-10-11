@@ -4,5 +4,6 @@
     <string name="app_name">Speed Memory</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_disconnect">Disconnect</string>
+    <string name="action_restart">Restart</string>
 
 </resources>
